@@ -57,7 +57,7 @@ def initForm(_dialog, _layer, _feature):
     # log(u"operator_id: {}".format(operator_id))
     # Populate problem combobox
     problem_combo = dialog.findChild(QComboBox, 'problem_type')
-    problem_combo.addItems(PROBLEM_TYPES)
+    problem_combo.addItems([unicode(p) for p in PROBLEM_TYPES])
     # Get fields
     problem = dialog.findChild(QLineEdit, 'problem')
     uuid_edit = dialog.findChild(QLineEdit, 'uuid')
@@ -68,13 +68,13 @@ def initForm(_dialog, _layer, _feature):
     modified = dialog.findChild(QLineEdit, 'modified')
     massif_id_widget = dialog.findChild(QLineEdit, 'massif_id')
     if isUpdating():
-        modified_by.setText(str(operator_id))
-        modified.setText(datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))
+        modified_by.setText(unicode(operator_id))
+        modified.setText(unicode(datetime.now().strftime("%Y-%m-%dT%H:%M:%S")))
     else:
-        created_by.setText(str(operator_id))
-        uuid_edit.setText(str(uuid.uuid1()))
-        massif_id_widget.setText(str(massif_id_val))
-        created.setText(datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))
+        created_by.setText(unicode(operator_id))
+        uuid_edit.setText(unicode(uuid.uuid1()))
+        massif_id_widget.setText(unicode(massif_id_val))
+        created.setText(unicode(datetime.now().strftime("%Y-%m-%dT%H:%M:%S")))
     problem_combo.currentIndexChanged.connect(problemChanged)
     problemChanged()
     dialog.resize(dialog.width(), 0)
