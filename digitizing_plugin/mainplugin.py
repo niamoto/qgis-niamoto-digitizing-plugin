@@ -5,6 +5,7 @@ import urllib
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+from requests import ConnectionError
 
 from digitizing_plugin.ui.massifs_dock import Ui_MassifTableWidget
 from digitizing_plugin import settings
@@ -17,11 +18,49 @@ GEOSERVER_BASE_URL = settings.GEOSERVER_BASE_URL
 
 class DigitizingPlugin(object):
 
+    CONNECTION_FAILED_TEXT = \
+        u"""
+        Ahou pardon! La connection au serveur a échoué, vérifiez votre,
+        connection internet. Si malgré ça le problème persiste, contactez les
+        développeurs de niamoto.
+        """
+    RETRY_CONNECTION_TEXT = u"Retenter la connection"
+
     def __init__(self, iface):
         self.iface = iface
         self.massifs_dock = QDockWidget("Digitalisation")
-        self.massif_table_widget = MassifTableWidget(self.iface)
-        self.massifs_dock.setWidget(self.massif_table_widget)
+        self.massif_table_widget = None
+        self.connection_failed_widget = None
+        self.retry_button = None
+        self.init_connection_failed_widget()
+        self.init_massif_table_widget()
+
+    def init_massif_table_widget(self):
+        try:
+            self.retry_button.setEnabled(False)
+            self.massif_table_widget = MassifTableWidget(self.iface)
+            self.massifs_dock.setWidget(self.massif_table_widget)
+        except (ConnectionError, Exception):
+            log(u"Connection failed!")
+            self.retry_button.setEnabled(True)
+            self.massifs_dock.setWidget(self.connection_failed_widget)
+
+    def init_connection_failed_widget(self):
+        label = QLabel(self.CONNECTION_FAILED_TEXT)
+        self.retry_button = QPushButton(self.RETRY_CONNECTION_TEXT)
+        self.retry_button.clicked.connect(self.init_massif_table_widget)
+        layout = QVBoxLayout()
+        spacer = QSpacerItem(
+            10, 10,
+            QSizePolicy.MinimumExpanding,
+            QSizePolicy.Expanding
+        )
+        layout.addItem(spacer)
+        layout.addWidget(label)
+        layout.addWidget(self.retry_button)
+        layout.addItem(QSpacerItem(spacer))
+        self.connection_failed_widget = QWidget()
+        self.connection_failed_widget.setLayout(layout)
 
     def initGui(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.massifs_dock)
