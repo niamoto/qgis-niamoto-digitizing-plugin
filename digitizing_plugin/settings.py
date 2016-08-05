@@ -39,6 +39,17 @@ STATIC_PATH = SETTINGS.get(
     os.path.join(PACKAGE_ROOT, "static")
 )
 
+
+# ================ #
+# User preferences #
+# ================ #
+
+LAST_OPERATOR = SETTINGS.get(
+    "LAST_OPERATOR",
+    None,
+)
+
+
 # ================ #
 # SLD static files #
 # ================ #

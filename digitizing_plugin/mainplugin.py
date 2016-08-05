@@ -100,6 +100,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         self.treeWidget.currentItemChanged.connect(self.tree_clicked)
         self.treeWidget.setCurrentIndex(QModelIndex())
         self.add_massif_button.setEnabled(False)
+        self.user_combobox.currentIndexChanged.connect(self.operator_changed)
 
     def populate_table(self):
         rows = list()
@@ -115,8 +116,19 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
 
     def populate_combobox(self):
         users = fetch_data.fetch_users(only_team=True)
-        for u in users:
+        index = None
+        for i, u in enumerate(users):
             self.user_combobox.addItem(u['full_name'], u['id'])
+            if settings.LAST_OPERATOR is not None:
+                if u['full_name'] == settings.LAST_OPERATOR:
+                    index = i
+        if index is not None:
+            self.user_combobox.setCurrentIndex(index)
+
+    def operator_changed(self):
+        operator = self.user_combobox.currentText()
+        settings.SETTINGS['LAST_OPERATOR'] = unicode(operator)
+        settings.write_settings()
 
     @staticmethod
     def get_user_map(user_list):
