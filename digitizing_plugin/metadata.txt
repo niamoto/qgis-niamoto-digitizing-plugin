@@ -2,7 +2,7 @@
 name=qgis-niamoto-digitizing-plugin
 email=dimitri.justeau@gmail.com
 author=Dimitri Justeau (IAC/AMAP)
-qgisMinimumVersion=2.14
+qgisMinimumVersion=2.16
 description=Load massif digitizing layer groups.
 about=Developed in New Caledonia by IAC/AMAP
 version=version 0.1

@@ -1,7 +1,5 @@
 # coding: utf-8
 
-import urllib
-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -10,10 +8,12 @@ from requests import ConnectionError
 from digitizing_plugin.ui.massifs_dock import Ui_MassifTableWidget
 from digitizing_plugin import settings
 from digitizing_plugin import fetch_data
-from utils import log, get_ogc_equal_filter
+from utils import log, construct_wfs_uri
 
 
 GEOSERVER_BASE_URL = settings.GEOSERVER_BASE_URL
+NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + '/niamoto/wfs'
+DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + '/digitizing/wfs'
 
 
 class DigitizingPlugin(object):
@@ -179,16 +179,13 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
 
     def get_massif_layer(self, massif_key_name):
         log(u"{} - Adding massif wfs layer".format(massif_key_name))
-        params = {
-            'SERVICE': 'WFS',
-            'VERSION': '1.0.0',
-            'REQUEST': 'GetFeature',
-            'SRSNAME': 'EPSG:4326',
-            'TYPENAME': 'niamoto:niamoto_data_massif',
-            'FILTER': get_ogc_equal_filter('key_name', massif_key_name)
-        }
-        uri = GEOSERVER_BASE_URL + '/niamoto/wfs?' \
-            + urllib.unquote(urllib.urlencode(params))
+        uri = construct_wfs_uri(
+            NIAMOTO_WFS_URL,
+            'niamoto:niamoto_data_massif',
+            version='1.0.0',
+            srsname='EPSG:4326',
+            filter="key_name='{}'".format(massif_key_name)
+        )
         log(uri)
         return QgsVectorLayer(
             uri,
@@ -200,16 +197,13 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_key_name = assignation['massif_key_name']
         massif_id = assignation['massif_id']
         log(u"{} - Adding forest area 30k wfs layer".format(massif_key_name))
-        params = {
-            'SERVICE': 'WFS',
-            'VERSION': '1.0.0',
-            'REQUEST': 'GetFeature',
-            'SRSNAME': 'EPSG:4326',
-            'TYPENAME': 'niamoto:forest_digitizing_forestfragment30k',
-            'FILTER': get_ogc_equal_filter('massif_id', massif_id)
-        }
-        uri = GEOSERVER_BASE_URL + '/niamoto/wfs?' \
-            + urllib.unquote(urllib.urlencode(params))
+        uri = construct_wfs_uri(
+            NIAMOTO_WFS_URL,
+            'niamoto:forest_digitizing_forestfragment30k',
+            version='1.0.0',
+            srsname='EPSG:4326',
+            filter='massif_id={}'.format(massif_id)
+        )
         log(uri)
         return QgsVectorLayer(
             uri,
@@ -221,16 +215,13 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_key_name = assignation['massif_key_name']
         massif_id = assignation['massif_id']
         log(u"{} - Adding forest area 3k wfs layer".format(massif_key_name))
-        params = {
-            'SERVICE': 'WFS',
-            'VERSION': '1.0.0',
-            'REQUEST': 'GetFeature',
-            'SRSNAME': 'EPSG:4326',
-            'TYPENAME': 'digitizing:forest_digitizing_forestfragment3k',
-            'FILTER': get_ogc_equal_filter('massif_id', massif_id)
-        }
-        uri = GEOSERVER_BASE_URL + '/digitizing/wfs?' \
-            + urllib.unquote(urllib.urlencode(params))
+        uri = construct_wfs_uri(
+            DIGITIZING_WFS_URL,
+            'digitizing:forest_digitizing_forestfragment3k',
+            version='1.0.0',
+            srsname='EPSG:4326',
+            filter='massif_id={}'.format(massif_id)
+        )
         log(uri)
         return QgsVectorLayer(
             uri,
@@ -242,16 +233,13 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_key_name = assignation['massif_key_name']
         massif_id = assignation['massif_id']
         log(u"{} - Adding problems wfs layer".format(massif_key_name))
-        params = {
-            'SERVICE': 'WFS',
-            'VERSION': '1.0.0',
-            'REQUEST': 'GetFeature',
-            'SRSNAME': 'EPSG:4326',
-            'TYPENAME': 'digitizing:forest_digitizing_digitizingproblem',
-            'FILTER': get_ogc_equal_filter('massif_id', massif_id)
-        }
-        uri = GEOSERVER_BASE_URL + '/digitizing/wfs?' \
-            + urllib.unquote(urllib.urlencode(params))
+        uri = construct_wfs_uri(
+            DIGITIZING_WFS_URL,
+            'digitizing:forest_digitizing_digitizingproblem',
+            version='1.0.0',
+            srsname='EPSG:4326',
+            filter='massif_id={}'.format(massif_id)
+        )
         log(uri)
         return QgsVectorLayer(
             uri,
