@@ -1,5 +1,7 @@
 # coding: utf-8
 
+# FORCE W/O BOM FOR WINDOWS
+
 import uuid
 from datetime import datetime
 
