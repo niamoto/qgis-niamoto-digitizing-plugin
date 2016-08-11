@@ -98,6 +98,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         self.populate_combobox()
         self.add_massif_button.clicked.connect(self.add_layer_group)
         self.treeWidget.currentItemChanged.connect(self.tree_clicked)
+        self.treeWidget.doubleClicked.connect(self.add_layer_group)
         self.treeWidget.setCurrentIndex(QModelIndex())
         self.add_massif_button.setEnabled(False)
         self.user_combobox.currentIndexChanged.connect(self.operator_changed)
