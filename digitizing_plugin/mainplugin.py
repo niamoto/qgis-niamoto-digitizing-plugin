@@ -159,6 +159,15 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         pb_layer.editFormConfig().setInitCodeSource(QgsEditFormConfig.CodeSourceFile)
         pb_layer.editFormConfig().setInitFilePath(settings.PROBLEM_FORM_INIT_PATH)
         pb_layer.editFormConfig().setInitFunction(settings.PROBLEM_FORM_INIT_FUNCTION)
+
+        def update_pb_layer():
+            pb_layer.reload()
+            pb_layer.dataProvider().forceReload()
+            pb_layer.triggerRepaint()
+            log("New feature added, reload triggered")
+
+            pb_layer.committedFeaturesAdded.connect(update_pb_layer)
+
         QgsMapLayerRegistry.instance().addMapLayer(pb_layer, False)
         pb_node = QgsLayerTreeLayer(pb_layer)
         group.addChildNode(pb_node)
@@ -169,6 +178,15 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         f3k_layer.editFormConfig().setInitCodeSource(QgsEditFormConfig.CodeSourceFile)
         f3k_layer.editFormConfig().setInitFilePath(settings.FOREST_FORM_INIT_PATH)
         f3k_layer.editFormConfig().setInitFunction(settings.FOREST_FORM_INIT_FUNCTION)
+
+        def update_f3k_layer():
+            f3k_layer.reload()
+            f3k_layer.dataProvider().forceReload()
+            f3k_layer.triggerRepaint()
+            log("New feature added, reload triggered")
+
+        f3k_layer.committedFeaturesAdded.connect(update_f3k_layer)
+
         QgsMapLayerRegistry.instance().addMapLayer(f3k_layer, False)
         f3k_node = QgsLayerTreeLayer(f3k_layer)
         group.addChildNode(f3k_node)
