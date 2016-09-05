@@ -41,7 +41,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -50,7 +50,41 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="user_combobox"/>
+      <widget class="QLabel" name="username_label">
+       <property name="styleSheet">
+        <string notr="true">font: 75 14pt &quot;Cantarell&quot;;
+</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="logout_button">
+       <property name="styleSheet">
+        <string notr="true">color: red;</string>
+       </property>
+       <property name="text">
+        <string>Déconnexion</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

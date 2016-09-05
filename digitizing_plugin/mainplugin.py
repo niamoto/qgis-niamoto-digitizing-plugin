@@ -1,10 +1,14 @@
 # coding: utf-8
 
+import json
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+import requests
 from requests import ConnectionError
 
+from digitizing_plugin.ui.authentication_widget import Ui_AuthenticationWidget
 from digitizing_plugin.ui.massifs_dock import Ui_MassifTableWidget
 from digitizing_plugin import settings
 from digitizing_plugin import fetch_data
@@ -31,14 +35,110 @@ class DigitizingPlugin(object):
         self.massifs_dock = QDockWidget("Digitalisation")
         self.massif_table_widget = None
         self.connection_failed_widget = None
+        self.authentication_widget = None
+        self.session = None
         self.retry_button = None
+        self.init_authentication_widget()
         self.init_connection_failed_widget()
-        self.init_massif_table_widget()
+        self.authenticate()
+
+    def authenticate(self):
+        self.authentication_widget.status_label.setText(u"")
+        if self.session is None:
+            self.authentication_widget.login_edit.setText(u"")
+            self.authentication_widget.password_edit.setText(u"")
+            self.massifs_dock.setWidget(self.authentication_widget)
+        else:
+            self.connect()
+
+    def connect(self):
+        username = self.authentication_widget.login_edit.text()
+        password = self.authentication_widget.password_edit.text()
+        if not username or not password:
+            t = u"Les informations de connexion sont incorrectes."
+            st = u"color: red;"
+            self.authentication_widget.status_label.setStyleSheet(st)
+            self.authentication_widget.status_label.setText(t)
+            self.session = None
+            return
+        try:
+            data = {
+                u"grant_type": u"password",
+                u"username": username,
+                u"password": password,
+            }
+            auth = (settings.OAUTH2_CLIENT_ID, settings.OAUTH2_CLIENT_SECRET)
+            r = requests.post(
+                settings.NIAMOTO_OAUTH2_TOKEN_URL,
+                data=data, auth=auth
+            )
+            if r.status_code == requests.codes.ok:
+                token = json.loads(r.text)
+                self.session = {
+                    u"token_type": token[u"token_type"],
+                    u"access_token": token[u"access_token"],
+                    u"refresh_token": token[u"refresh_token"]
+                }
+                self.get_whoami()
+                t = u"Authentification réussie, chargement des données..."
+                st = u"color: green;"
+                self.authentication_widget.status_label.setStyleSheet(st)
+                self.authentication_widget.status_label.setText(t)
+                QApplication.processEvents()
+                self.init_massif_table_widget()
+            elif r.status_code == requests.codes.unauthorized:
+                t = u"Les informations de connexion sont incorrectes."
+                st = u"color: red;"
+                self.authentication_widget.status_label.setStyleSheet(st)
+                self.authentication_widget.status_label.setText(t)
+                self.session = None
+            else:
+                self.session = None
+                r.raise_for_status()
+        except (ConnectionError, Exception):
+            self.session = None
+            log(u"Connection failed!")
+            self.retry_button.setEnabled(True)
+            self.massifs_dock.setWidget(self.connection_failed_widget)
+
+    def get_whoami(self):
+        try:
+            headers = {
+                u"Authorization": u"{} {}".format(
+                    self.session[u"token_type"],
+                    self.session[u"access_token"],
+                )
+            }
+            r = requests.get(
+                u"{}whoami/".format(settings.NIAMOTO_REST_BASE_URL),
+                headers=headers
+            )
+            r.raise_for_status()
+            if r.status_code == requests.codes.ok:
+                whoami = json.loads(r.text)
+                self.session[u"userid"] = whoami[u"id"]
+                self.session[u"useremail"] = whoami[u"email"]
+                self.session[u"username"] = whoami[u"username"]
+            elif r.status_code == requests.codes.unauthorized:
+                self.authentication_widget.status_label.setText(
+                    u"""
+                    Les informations de connexon sont incorrectes.
+                    """
+                )
+        except (ConnectionError, Exception):
+            log(u"Connection failed!")
+            self.retry_button.setEnabled(True)
+            self.massifs_dock.setWidget(self.connection_failed_widget)
+
+    def logout(self):
+        self.session = None
+        self.authenticate()
 
     def init_massif_table_widget(self):
         try:
             self.retry_button.setEnabled(False)
-            self.massif_table_widget = MassifTableWidget(self.iface)
+            self.massif_table_widget = MassifTableWidget(self.iface, self.session)
+            self.massif_table_widget.logout_button.clicked.connect(self.logout)
             self.massifs_dock.setWidget(self.massif_table_widget)
         except (ConnectionError, Exception):
             log(u"Connection failed!")
@@ -48,7 +148,7 @@ class DigitizingPlugin(object):
     def init_connection_failed_widget(self):
         label = QLabel(self.CONNECTION_FAILED_TEXT)
         self.retry_button = QPushButton(self.RETRY_CONNECTION_TEXT)
-        self.retry_button.clicked.connect(self.init_massif_table_widget)
+        self.retry_button.clicked.connect(self.authenticate)
         layout = QVBoxLayout()
         spacer = QSpacerItem(
             10, 10,
@@ -61,6 +161,10 @@ class DigitizingPlugin(object):
         layout.addItem(QSpacerItem(spacer))
         self.connection_failed_widget = QWidget()
         self.connection_failed_widget.setLayout(layout)
+
+    def init_authentication_widget(self):
+        self.authentication_widget = AuthenticationWidget()
+        self.authentication_widget.connect_button.clicked.connect(self.connect)
 
     def initGui(self):
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.massifs_dock)
@@ -75,8 +179,19 @@ class DigitizingPlugin(object):
         return self.massif_table_widget.massif_map[massif_key_name]
 
     def get_operator_id(self):
-        cb = self.massif_table_widget.user_combobox
-        return cb.itemData(cb.currentIndex(), Qt.UserRole)
+        return self.session[u"userid"]
+
+
+class AuthenticationWidget(QWidget, Ui_AuthenticationWidget):
+
+    def __init__(self, parent=None):
+        super(AuthenticationWidget, self).__init__(parent)
+        self.setupUi(self)
+
+    def keyPressEvent(self, event):
+        if type(event) == QKeyEvent:
+            if event.key() == Qt.Key_Enter:
+                self.connect_button.click()
 
 
 class MassifTableWidget(QWidget, Ui_MassifTableWidget):
@@ -87,21 +202,20 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         2: u"A valider",
     }
 
-    def __init__(self, iface, parent=None):
+    def __init__(self, iface, session, parent=None):
         super(MassifTableWidget, self).__init__(parent)
         self.setupUi(self)
         self.iface = iface
-        self.assignations = fetch_data.fetch_massif_assignations()
-        self.all_users = self.get_user_map(fetch_data.fetch_users())
+        self.session = session
+        self.username_label.setText(self.session[u"username"])
+        self.assignations = fetch_data.fetch_massif_assignations(self.session)
         self.massif_map = self.get_massif_map(self.assignations)
         self.populate_table()
-        self.populate_combobox()
         self.add_massif_button.clicked.connect(self.add_layer_group)
         self.treeWidget.currentItemChanged.connect(self.tree_clicked)
         self.treeWidget.doubleClicked.connect(self.add_layer_group)
         self.treeWidget.setCurrentIndex(QModelIndex())
         self.add_massif_button.setEnabled(False)
-        self.user_combobox.currentIndexChanged.connect(self.operator_changed)
 
     def populate_table(self):
         rows = list()
@@ -109,34 +223,10 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
             item = QTreeWidgetItem()
             item.setData(0, Qt.UserRole, a)
             item.setText(0, unicode(a['massif_key_name']))
-            operator_full_name = self.all_users[a['operator']]['full_name']
-            item.setText(1, unicode(operator_full_name))
+            item.setText(1, unicode(a['operator_full_name']))
             item.setText(2, unicode(self.STATUS_LABELS[a['status']]))
             rows.append(item)
         self.treeWidget.addTopLevelItems(rows)
-
-    def populate_combobox(self):
-        users = fetch_data.fetch_users(only_team=True)
-        index = None
-        for i, u in enumerate(users):
-            self.user_combobox.addItem(u['full_name'], u['id'])
-            if settings.LAST_OPERATOR is not None:
-                if u['full_name'] == settings.LAST_OPERATOR:
-                    index = i
-        if index is not None:
-            self.user_combobox.setCurrentIndex(index)
-
-    def operator_changed(self):
-        operator = self.user_combobox.currentText()
-        settings.SETTINGS['LAST_OPERATOR'] = unicode(operator)
-        settings.write_settings()
-
-    @staticmethod
-    def get_user_map(user_list):
-        user_map = dict()
-        for u in user_list:
-            user_map[u['id']] = u
-        return user_map
 
     @staticmethod
     def get_massif_map(assignations):
@@ -160,14 +250,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         pb_layer.editFormConfig().setInitCodeSource(QgsEditFormConfig.CodeSourceFile)
         pb_layer.editFormConfig().setInitFilePath(settings.PROBLEM_FORM_INIT_PATH)
         pb_layer.editFormConfig().setInitFunction(settings.PROBLEM_FORM_INIT_FUNCTION)
-
-        def update_pb_layer():
-            pb_layer.reload()
-            pb_layer.dataProvider().forceReload()
-            pb_layer.triggerRepaint()
-            log("New feature added, reload triggered")
-
-            pb_layer.committedFeaturesAdded.connect(update_pb_layer)
+        pb_layer.committedFeaturesAdded.connect(lambda: self.update_layer(pb_layer))
 
         QgsMapLayerRegistry.instance().addMapLayer(pb_layer, False)
         pb_node = QgsLayerTreeLayer(pb_layer)
@@ -179,14 +262,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         f3k_layer.editFormConfig().setInitCodeSource(QgsEditFormConfig.CodeSourceFile)
         f3k_layer.editFormConfig().setInitFilePath(settings.FOREST_FORM_INIT_PATH)
         f3k_layer.editFormConfig().setInitFunction(settings.FOREST_FORM_INIT_FUNCTION)
-
-        def update_f3k_layer():
-            f3k_layer.reload()
-            f3k_layer.dataProvider().forceReload()
-            f3k_layer.triggerRepaint()
-            log("New feature added, reload triggered")
-
-        f3k_layer.committedFeaturesAdded.connect(update_f3k_layer)
+        f3k_layer.committedFeaturesAdded.connect(lambda: self.update_layer(f3k_layer))
 
         QgsMapLayerRegistry.instance().addMapLayer(f3k_layer, False)
         f3k_node = QgsLayerTreeLayer(f3k_layer)
@@ -204,6 +280,13 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         QgsMapLayerRegistry.instance().addMapLayer(massif_layer, False)
         massif_node = QgsLayerTreeLayer(massif_layer)
         group.addChildNode(massif_node)
+
+    @staticmethod
+    def update_layer(layer):
+        layer.reload()
+        layer.dataProvider().forceReload()
+        layer.triggerRepaint()
+        log("New feature added, reload triggered")
 
     def tree_clicked(self):
         self.add_massif_button.setEnabled(True)

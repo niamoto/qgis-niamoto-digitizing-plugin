@@ -42,7 +42,7 @@ STATIC_PATH = SETTINGS.get(
 
 # ================ #
 # User preferences #
-# ================ #
+# ================ #
 
 LAST_OPERATOR = SETTINGS.get(
     "LAST_OPERATOR",
@@ -125,4 +125,23 @@ PROBLEM_FORM_INIT_PATH = SETTINGS.get(
 PROBLEM_FORM_INIT_FUNCTION = SETTINGS.get(
     "PROBLEM_FORM_INIT_FUNCTION",
     "initForm"
+)
+
+# =============== #
+# OAUTH2 settings #
+# =============== #
+
+NIAMOTO_OAUTH2_TOKEN_URL = SETTINGS.get(
+    "NIAMOTO_OAUTH2_TOKEN_URL",
+    u"http://niamoto.ird.nc/o/token/"
+)
+
+OAUTH2_CLIENT_ID = SETTINGS.get(
+    "OAUTH2_CLIENT_ID",
+    "ystnxvD5Sjnd7UtAV3Qj3Hou8ZKAZtlzJEnHySoX"
+)
+
+OAUTH2_CLIENT_SECRET = SETTINGS.get(
+    "OAUTH2_CLIENT_SECRET",
+    "5HAIZVFjFF0MlK1CJE4tfHbNk734qqyxZ9XLz20ZvtQbrxd61gIhQ6FhyW0jxju26GTJtbhxJP6oTqrrV8kLcLEjW4KCmI1vBf0F6hQ2sCYnWQOAONgqoEO72w12NdKo"
 )

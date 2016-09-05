@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/massifs_dock.ui'
+# Form implementation generated from reading ui file 'digitizing_plugin/ui/massifs_dock.ui'
 #
-# Created: Fri Jul 22 11:59:47 2016
+# Created: Mon Sep  5 11:46:04 2016
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,11 +40,20 @@ class Ui_MassifTableWidget(object):
         self.label = QtGui.QLabel(MassifTableWidget)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
-        self.user_combobox = QtGui.QComboBox(MassifTableWidget)
-        self.user_combobox.setObjectName(_fromUtf8("user_combobox"))
-        self.horizontalLayout.addWidget(self.user_combobox)
-        self.horizontalLayout.setStretch(0, 1)
-        self.horizontalLayout.setStretch(1, 2)
+        self.username_label = QtGui.QLabel(MassifTableWidget)
+        self.username_label.setStyleSheet(_fromUtf8("font: 75 14pt \"Cantarell\";\n"
+""))
+        self.username_label.setText(_fromUtf8(""))
+        self.username_label.setObjectName(_fromUtf8("username_label"))
+        self.horizontalLayout.addWidget(self.username_label)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.logout_button = QtGui.QPushButton(MassifTableWidget)
+        self.logout_button.setStyleSheet(_fromUtf8("color: red;"))
+        self.logout_button.setFlat(True)
+        self.logout_button.setObjectName(_fromUtf8("logout_button"))
+        self.horizontalLayout.addWidget(self.logout_button)
+        self.horizontalLayout.setStretch(1, 1)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(MassifTableWidget)
@@ -57,4 +66,5 @@ class Ui_MassifTableWidget(object):
         self.treeWidget.headerItem().setText(2, _translate("MassifTableWidget", "Status", None))
         self.add_massif_button.setText(_translate("MassifTableWidget", "Ajouter les couches du massif", None))
         self.label.setText(_translate("MassifTableWidget", "Opérateur actuel:", None))
+        self.logout_button.setText(_translate("MassifTableWidget", "Déconnexion", None))
 
