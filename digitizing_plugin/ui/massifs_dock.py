@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'digitizing_plugin/ui/massifs_dock.ui'
 #
-# Created: Mon Sep  5 11:46:04 2016
+# Created: Mon Sep  5 14:39:42 2016
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,6 +44,7 @@ class Ui_MassifTableWidget(object):
         self.username_label.setStyleSheet(_fromUtf8("font: 75 14pt \"Cantarell\";\n"
 ""))
         self.username_label.setText(_fromUtf8(""))
+        self.username_label.setAlignment(QtCore.Qt.AlignCenter)
         self.username_label.setObjectName(_fromUtf8("username_label"))
         self.horizontalLayout.addWidget(self.username_label)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

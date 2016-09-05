@@ -118,6 +118,7 @@ class DigitizingPlugin(object):
                 whoami = json.loads(r.text)
                 self.session[u"userid"] = whoami[u"id"]
                 self.session[u"useremail"] = whoami[u"email"]
+                self.session[u"full_name"] = whoami[u"full_name"]
                 self.session[u"username"] = whoami[u"username"]
             elif r.status_code == requests.codes.unauthorized:
                 self.authentication_widget.status_label.setText(
@@ -207,7 +208,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         self.setupUi(self)
         self.iface = iface
         self.session = session
-        self.username_label.setText(self.session[u"username"])
+        self.username_label.setText(self.session[u"full_name"])
         self.assignations = fetch_data.fetch_massif_assignations(self.session)
         self.massif_map = self.get_massif_map(self.assignations)
         self.populate_table()
