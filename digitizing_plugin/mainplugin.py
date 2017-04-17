@@ -2,16 +2,17 @@
 
 import json
 
+from qgis.core import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from qgis.core import *
 import requests
 from requests import ConnectionError
 
-from digitizing_plugin.ui.authentication_widget import Ui_AuthenticationWidget
-from digitizing_plugin.ui.massifs_dock import Ui_MassifTableWidget
-from digitizing_plugin import settings
 from digitizing_plugin import fetch_data
+from digitizing_plugin import settings
+from digitizing_plugin.gui.ui.massifs_dock import Ui_MassifTableWidget
+from digitizing_plugin.gui.ui.authentication_widget import Ui_AuthenticationWidget
+from digitizing_plugin.gui.settings import NiamotoDigitizingSettings
 from utils import log, construct_wfs_uri
 
 
@@ -167,8 +168,29 @@ class DigitizingPlugin(object):
         self.authentication_widget = AuthenticationWidget()
         self.authentication_widget.connect_button.clicked.connect(self.connect)
 
+    def init_settings_action(self):
+        self.settings_action = QAction(
+            "Niamoto digitizing settings",
+            self.iface.mainWindow()
+        )
+        self.settings_action.setObjectName('NiamotoDigitizingSettings')
+        self.settings_action.setWhatsThis('Niamoto digitizing plugin settings')
+        QObject.connect(
+            self.settings_action,
+            SIGNAL('triggered()'),
+            self.run_settings
+        )
+        self.iface.addPluginToMenu('Niamoto digitizing', self.settings_action)
+
+    def run_settings(self):
+        dialog = NiamotoDigitizingSettings(self, self.iface.mainWindow())
+        if dialog.exec_() == QDialog.Accepted:
+            pass
+
     def initGui(self):
+        self.init_settings_action()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.massifs_dock)
+
 
     def run(self):
         self.massifs_dock.show()
