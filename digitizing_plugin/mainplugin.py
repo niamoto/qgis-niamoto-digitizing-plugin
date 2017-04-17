@@ -170,7 +170,7 @@ class DigitizingPlugin(object):
 
     def init_settings_action(self):
         self.settings_action = QAction(
-            "Niamoto digitizing settings",
+            "Settings",
             self.iface.mainWindow()
         )
         self.settings_action.setObjectName('NiamotoDigitizingSettings')
@@ -183,7 +183,7 @@ class DigitizingPlugin(object):
         self.iface.addPluginToMenu('Niamoto digitizing', self.settings_action)
 
     def run_settings(self):
-        dialog = NiamotoDigitizingSettings(self, self.iface.mainWindow())
+        dialog = NiamotoDigitizingSettings(self.iface.mainWindow())
         if dialog.exec_() == QDialog.Accepted:
             pass
 
@@ -191,12 +191,11 @@ class DigitizingPlugin(object):
         self.init_settings_action()
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.massifs_dock)
 
-
     def run(self):
         self.massifs_dock.show()
 
     def unload(self):
-        pass
+        self.iface.removePluginMenu('Niamoto digitizing', self.settings_action)
 
     def get_massif_id(self, massif_key_name):
         return self.massif_table_widget.massif_map[massif_key_name]
