@@ -26,12 +26,12 @@ load_settings()
 
 NIAMOTO_REST_BASE_URL = SETTINGS.get(
     "NIAMOTO_REST_BASE_URL",
-    "http://niamoto.ird.nc/api/1.0/"
+    u"https://niamoto.ird.nc/api/1.0/"
 )
 
 GEOSERVER_BASE_URL = SETTINGS.get(
     "GEOSERVER_BASE_URL",
-    "http://geoniamoto.ird.nc:8080/geoserver"
+    u"http://geoniamoto.ird.nc:8080/geoserver"
 )
 
 STATIC_PATH = SETTINGS.get(
@@ -133,7 +133,7 @@ PROBLEM_FORM_INIT_FUNCTION = SETTINGS.get(
 
 NIAMOTO_OAUTH2_TOKEN_URL = SETTINGS.get(
     "NIAMOTO_OAUTH2_TOKEN_URL",
-    u"http://niamoto.ird.nc/o/token/"
+    u"https://niamoto.ird.nc/o/token/"
 )
 
 OAUTH2_CLIENT_ID = SETTINGS.get(
