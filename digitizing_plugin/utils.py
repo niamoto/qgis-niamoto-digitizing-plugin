@@ -12,8 +12,6 @@ def construct_wfs_uri(url, typename, **kwargs):
         'url': url,
         'typename': typename,
         'request': 'GetFeature',
-        'user': 'digitizer',
-        'password': 'niamoto_digitizer'
     }
     params.update(kwargs)
     return ' '.join(['{}="{}"'.format(k, v) for k, v in params.items()])

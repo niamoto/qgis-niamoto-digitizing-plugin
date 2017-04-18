@@ -34,6 +34,8 @@ class DigitizingPlugin(object):
         self.authentication_widget = None
         self.session = None
         self.retry_button = None
+        self.digitizer_user = None
+        self.digitizer_password = None
         self.init_authentication_widget()
         self.init_connection_failed_widget()
         self.authenticate()
@@ -76,6 +78,8 @@ class DigitizingPlugin(object):
                     u"refresh_token": token[u"refresh_token"]
                 }
                 self.get_whoami()
+                if not self.get_digitizer_password():
+                    return
                 t = u"Authentification réussie, chargement des données..."
                 st = u"color: green;"
                 self.authentication_widget.status_label.setStyleSheet(st)
@@ -97,35 +101,53 @@ class DigitizingPlugin(object):
             self.retry_button.setEnabled(True)
             self.massifs_dock.setWidget(self.connection_failed_widget)
 
-    def get_whoami(self):
-        try:
-            headers = {
+    def get_digitizer_password(self):
+        r = requests.get(
+            settings.NIAMOTO_REST_BASE_URL + u'digitizer_password',
+            headers={
                 u"Authorization": u"{} {}".format(
                     self.session[u"token_type"],
                     self.session[u"access_token"],
                 )
             }
-            r = requests.get(
-                u"{}whoami/".format(settings.NIAMOTO_REST_BASE_URL),
-                headers=headers
+        )
+        if r.status_code == requests.codes.ok:
+            digit_info = json.loads(r.text)
+            self.session[u'digitizer_user'] = digit_info[u'user']
+            self.session[u'digitizer_password'] = digit_info[u'password']
+            return True
+        else:
+            t = u"Vous n'êtes pas autorisé à accéder à ce service."
+            st = u"color: red;"
+            self.authentication_widget.status_label.setStyleSheet(st)
+            self.authentication_widget.status_label.setText(t)
+            self.session = None
+        return False
+
+    def get_whoami(self):
+        headers = {
+            u"Authorization": u"{} {}".format(
+                self.session[u"token_type"],
+                self.session[u"access_token"],
             )
-            r.raise_for_status()
-            if r.status_code == requests.codes.ok:
-                whoami = json.loads(r.text)
-                self.session[u"userid"] = whoami[u"id"]
-                self.session[u"useremail"] = whoami[u"email"]
-                self.session[u"full_name"] = whoami[u"full_name"]
-                self.session[u"username"] = whoami[u"username"]
-            elif r.status_code == requests.codes.unauthorized:
-                self.authentication_widget.status_label.setText(
-                    u"""
-                    Les informations de connexon sont incorrectes.
-                    """
-                )
-        except (ConnectionError, Exception):
-            log(u"Connection failed!")
-            self.retry_button.setEnabled(True)
-            self.massifs_dock.setWidget(self.connection_failed_widget)
+        }
+        r = requests.get(
+            u"{}whoami/".format(settings.NIAMOTO_REST_BASE_URL),
+            headers=headers
+        )
+        r.raise_for_status()
+        if r.status_code == requests.codes.ok:
+            whoami = json.loads(r.text)
+            self.session[u"userid"] = whoami[u"id"]
+            self.session[u"useremail"] = whoami[u"email"]
+            self.session[u"full_name"] = whoami[u"full_name"]
+            self.session[u"username"] = whoami[u"username"]
+        elif r.status_code == requests.codes.unauthorized:
+            self.authentication_widget.status_label.setText(
+                u"""
+                Les informations de connexon sont incorrectes.
+                """
+            )
 
     def logout(self):
         self.session = None
@@ -315,7 +337,9 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
             'niamoto:niamoto_data_massif',
             version='1.0.0',
             srsname='EPSG:4326',
-            filter="key_name='{}'".format(massif_key_name)
+            filter="key_name='{}'".format(massif_key_name),
+            user=self.session[u'digitizer_user'],
+            password=self.session[u'digitizer_password'],
         )
         log(uri)
         return QgsVectorLayer(
@@ -333,7 +357,9 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
             'niamoto:forest_digitizing_forestfragment30k',
             version='1.0.0',
             srsname='EPSG:4326',
-            filter='massif_id={}'.format(massif_id)
+            filter='massif_id={}'.format(massif_id),
+            user=self.session[u'digitizer_user'],
+            password=self.session[u'digitizer_password'],
         )
         log(uri)
         return QgsVectorLayer(
@@ -351,7 +377,9 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
             'digitizing:forest_digitizing_forestfragment3k',
             version='1.0.0',
             srsname='EPSG:4326',
-            filter='massif_id={}'.format(massif_id)
+            filter='massif_id={}'.format(massif_id),
+            user=self.session[u'digitizer_user'],
+            password=self.session[u'digitizer_password'],
         )
         log(uri)
         return QgsVectorLayer(
@@ -369,7 +397,9 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
             'digitizing:forest_digitizing_digitizingproblem',
             version='1.0.0',
             srsname='EPSG:4326',
-            filter='massif_id={}'.format(massif_id)
+            filter='massif_id={}'.format(massif_id),
+            user=self.session[u'digitizer_user'],
+            password=self.session[u'digitizer_password'],
         )
         log(uri)
         return QgsVectorLayer(
