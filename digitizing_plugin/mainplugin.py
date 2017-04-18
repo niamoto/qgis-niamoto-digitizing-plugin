@@ -16,11 +16,6 @@ from digitizing_plugin.gui.settings import NiamotoDigitizingSettings
 from utils import log, construct_wfs_uri
 
 
-GEOSERVER_BASE_URL = settings.GEOSERVER_BASE_URL
-NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + '/niamoto/wfs'
-DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + '/digitizing/wfs'
-
-
 class DigitizingPlugin(object):
 
     CONNECTION_FAILED_TEXT = \
@@ -185,7 +180,7 @@ class DigitizingPlugin(object):
     def run_settings(self):
         dialog = NiamotoDigitizingSettings(self.iface.mainWindow())
         if dialog.exec_() == QDialog.Accepted:
-            pass
+            dialog.write_settings()
 
     def initGui(self):
         self.init_settings_action()
@@ -316,7 +311,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
     def get_massif_layer(self, massif_key_name):
         log(u"{} - Adding massif wfs layer".format(massif_key_name))
         uri = construct_wfs_uri(
-            NIAMOTO_WFS_URL,
+            settings.NIAMOTO_WFS_URL,
             'niamoto:niamoto_data_massif',
             version='1.0.0',
             srsname='EPSG:4326',
@@ -334,7 +329,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_id = assignation['massif_id']
         log(u"{} - Adding forest area 30k wfs layer".format(massif_key_name))
         uri = construct_wfs_uri(
-            NIAMOTO_WFS_URL,
+            settings.NIAMOTO_WFS_URL,
             'niamoto:forest_digitizing_forestfragment30k',
             version='1.0.0',
             srsname='EPSG:4326',
@@ -352,7 +347,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_id = assignation['massif_id']
         log(u"{} - Adding forest area 3k wfs layer".format(massif_key_name))
         uri = construct_wfs_uri(
-            DIGITIZING_WFS_URL,
+            settings.DIGITIZING_WFS_URL,
             'digitizing:forest_digitizing_forestfragment3k',
             version='1.0.0',
             srsname='EPSG:4326',
@@ -370,7 +365,7 @@ class MassifTableWidget(QWidget, Ui_MassifTableWidget):
         massif_id = assignation['massif_id']
         log(u"{} - Adding problems wfs layer".format(massif_key_name))
         uri = construct_wfs_uri(
-            DIGITIZING_WFS_URL,
+            settings.DIGITIZING_WFS_URL,
             'digitizing:forest_digitizing_digitizingproblem',
             version='1.0.0',
             srsname='EPSG:4326',

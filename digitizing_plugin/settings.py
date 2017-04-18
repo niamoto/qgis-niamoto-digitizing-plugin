@@ -24,15 +24,44 @@ def write_settings():
 load_settings()
 
 
-NIAMOTO_REST_BASE_URL = SETTINGS.get(
+NIAMOTO_BASE_URL = SETTINGS.get(
     "NIAMOTO_REST_BASE_URL",
-    u"https://niamoto.ird.nc/api/1.0/"
+    u"http://niamoto.io/"
 )
+NIAMOTO_REST_BASE_URL = NIAMOTO_BASE_URL + u"api/1.0/"
+
+
+def set_niamoto_base_url(value):
+    global SETTINGS, \
+        NIAMOTO_BASE_URL, \
+        NIAMOTO_REST_BASE_URL,\
+        NIAMOTO_OAUTH2_TOKEN_URL
+    NIAMOTO_BASE_URL = value
+    NIAMOTO_REST_BASE_URL = NIAMOTO_BASE_URL + u"api/1.0/"
+    NIAMOTO_OAUTH2_TOKEN_URL = NIAMOTO_BASE_URL + u"o/token/"
+    SETTINGS['NIAMOTO_BASE_URL'] = value
+    write_settings()
+
 
 GEOSERVER_BASE_URL = SETTINGS.get(
     "GEOSERVER_BASE_URL",
-    u"http://geoniamoto.ird.nc:8080/geoserver"
+    u"http://geo.niamoto.io:8080/geoserver/"
 )
+NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs'
+DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs'
+
+
+def set_geoserver_base_url(value):
+    global SETTINGS,\
+        GEOSERVER_BASE_URL,\
+        NIAMOTO_WFS_URL,\
+        DIGITIZING_WFS_URL
+    GEOSERVER_BASE_URL = value
+    NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs'
+    DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs'
+    SETTINGS['GEOSERVER_BASE_URL'] = value
+    write_settings()
+
 
 STATIC_PATH = SETTINGS.get(
     "STATIC_PATH",
@@ -131,10 +160,7 @@ PROBLEM_FORM_INIT_FUNCTION = SETTINGS.get(
 # OAUTH2 settings #
 # =============== #
 
-NIAMOTO_OAUTH2_TOKEN_URL = SETTINGS.get(
-    "NIAMOTO_OAUTH2_TOKEN_URL",
-    u"https://niamoto.ird.nc/o/token/"
-)
+NIAMOTO_OAUTH2_TOKEN_URL = NIAMOTO_BASE_URL + u"o/token/"
 
 OAUTH2_CLIENT_ID = SETTINGS.get(
     "OAUTH2_CLIENT_ID",
