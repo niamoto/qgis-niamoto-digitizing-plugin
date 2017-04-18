@@ -47,8 +47,8 @@ GEOSERVER_BASE_URL = SETTINGS.get(
     "GEOSERVER_BASE_URL",
     u"http://geo.niamoto.io:8080/geoserver/"
 )
-NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs'
-DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs'
+NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs/'
+DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs/'
 
 
 def set_geoserver_base_url(value):
@@ -57,8 +57,8 @@ def set_geoserver_base_url(value):
         NIAMOTO_WFS_URL,\
         DIGITIZING_WFS_URL
     GEOSERVER_BASE_URL = value
-    NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs'
-    DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs'
+    NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs/'
+    DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs/'
     SETTINGS['GEOSERVER_BASE_URL'] = value
     write_settings()
 

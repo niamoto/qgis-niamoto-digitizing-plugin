@@ -10,7 +10,10 @@ def log(msg):
 def construct_wfs_uri(url, typename, **kwargs):
     params = {
         'url': url,
-        'typename': typename
+        'typename': typename,
+        'request': 'GetFeature',
+        'user': 'digitizer',
+        'password': 'niamoto_digitizer'
     }
     params.update(kwargs)
     return ' '.join(['{}="{}"'.format(k, v) for k, v in params.items()])
