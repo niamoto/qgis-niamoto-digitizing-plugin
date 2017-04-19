@@ -26,7 +26,7 @@ load_settings()
 
 NIAMOTO_BASE_URL = SETTINGS.get(
     "NIAMOTO_REST_BASE_URL",
-    u"http://niamoto.io/"
+    u"https://niamoto.io/"
 )
 NIAMOTO_REST_BASE_URL = NIAMOTO_BASE_URL + u"api/1.0/"
 
@@ -45,7 +45,7 @@ def set_niamoto_base_url(value):
 
 GEOSERVER_BASE_URL = SETTINGS.get(
     "GEOSERVER_BASE_URL",
-    u"http://geo.niamoto.io:8080/geoserver/"
+    u"https://geo.niamoto.io/geoserver/"
 )
 NIAMOTO_WFS_URL = GEOSERVER_BASE_URL + u'niamoto/wfs/'
 DIGITIZING_WFS_URL = GEOSERVER_BASE_URL + u'digitizing/wfs/'
