@@ -12,6 +12,7 @@ def construct_wfs_uri(url, typename, **kwargs):
         'url': url,
         'typename': typename,
         'request': 'GetFeature',
+        'outputformat': 'GML2',
     }
     params.update(kwargs)
     return ' '.join(['{}="{}"'.format(k, v) for k, v in params.items()])
